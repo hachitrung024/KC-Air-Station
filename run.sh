@@ -7,4 +7,4 @@ else
     exit 1
 fi
 
-python3 app/main.py
+python3 main.py

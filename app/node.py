@@ -8,6 +8,6 @@ async def node_task(uart_rx_queue, lora_tx_queue):
             data_part = uart_rx_data[13:]
             final_data = json.loads(data_part)
             print(f"Parse json sucess {final_data}")
+            await lora_tx_queue.put(final_data) # directly foward
         except:
             continue
-        await lora_tx_queue.put(final_data) # directly foward

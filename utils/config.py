@@ -8,3 +8,6 @@ def get_lora_config():
 
 def get_uart_config():
     return _config["uart"]
+
+def get_target_config():
+    return _config["target"]

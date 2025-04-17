@@ -1,6 +1,10 @@
 import configparser
 
-def get_mode():
-    config = configparser.ConfigParser()
-    config.read("config/settings.ini")
-    return config["system"].get("mode", "gateway")
+_config = configparser.ConfigParser()
+_config.read("config/settings.ini")
+
+def get_lora_config():
+    return _config["lora"]
+
+def get_uart_config():
+    return _config["uart"]

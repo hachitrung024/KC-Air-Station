@@ -1,3 +1,5 @@
 ebyte-lora-e22-rpi
 RPi.GPIO
 pyserial
+python-dotenv
+paho.mqtt

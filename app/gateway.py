@@ -8,26 +8,21 @@ config.read("config/settings.ini")
 
 station_map = dict(config["station_mapping"])
 sensor_map = dict(config["sensor_mapping"])
+
 print("Mapping:")
 print(station_map)
 print(sensor_map)
-def is_valid_json(text):
-    try:
-        json.loads(text)
-        return True
-    except json.JSONDecodeError:
-        return False
 
 async def gateway_task(lora_rx_queue, mqtt_publish_queue):
     while True:
         await asyncio.sleep(0.01)
         data = await lora_rx_queue.get()
         if isinstance(data, bytes):
-            data = data.decode("utf-8")
-        if not is_valid_json(data):
+            data = data.decode("utf-8", errors='ignore')
+        try:
+            raw_json = json.loads(data)
+        except json.JSONDecodeError:
             continue
-
-        raw_json = json.loads(data)
 
         if not isinstance(raw_json, dict) or len(raw_json) != 1:
             continue

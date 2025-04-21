@@ -1,0 +1,10 @@
+sudo apt update
+sudo apt upgrade -y
+sudo apt install git -y
+sudo apt install python3-venv -y
+git clone https://github.com/hachitrung024/KC-Air-Station.git
+cd KC-Air-Station/
+chmod +x setup.sh
+bash setup.sh
+sudo raspi-config nonint do_serial 1 && sudo sed -i '/^enable_uart=/d' /boot/config.txt && echo 'enable_uart=1' | sudo tee -a /boot/config.txt
+sudo reboot

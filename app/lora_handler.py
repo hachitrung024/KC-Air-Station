@@ -26,11 +26,14 @@ async def lora_receiver(lora_rx_queue):
     while True:
         async with lora_lock:
             if lora.available() > 0:
-                code, value, rssi = lora.receive_message(rssi=True)
-                print('RSSI: ', rssi)
-                print(ResponseStatusCode.get_description(code))
-                await lora_rx_queue.put(value)
-                await asyncio.sleep(2)
+                try:
+                    code, value, rssi = lora.receive_message(rssi=True)
+                    print('RSSI: ', rssi)
+                    print(ResponseStatusCode.get_description(code))
+                    await lora_rx_queue.put(value)
+                except Exception as e:
+                    print(" LoRa receiver error:", e)
+                await asyncio.sleep(0.2)
         await asyncio.sleep(0.1)
 
 async def lora_sender(lora_tx_queue):

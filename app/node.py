@@ -1,5 +1,6 @@
 import json
 import asyncio
+import random
 async def node_task(uart_rx_queue, lora_tx_queue):
     while True:
         await asyncio.sleep(0.01)
@@ -10,6 +11,7 @@ async def node_task(uart_rx_queue, lora_tx_queue):
             data_part = uart_rx_data[13:]
             final_data = json.dumps(json.loads(data_part))
             print(f"Parse json sucess {final_data}")
+            await asyncio.sleep(random.randint(0,5))
             await lora_tx_queue.put(final_data)
         except:
             continue

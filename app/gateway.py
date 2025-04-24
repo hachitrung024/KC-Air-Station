@@ -1,17 +1,17 @@
 import asyncio
 import json
-import configparser
+import os
 
-config = configparser.ConfigParser()
-config.optionxform = str
-config.read("config/settings.ini")
+# Đọc file JSON
+with open("data/node_map.json", "r") as f:
+    station_map = json.load(f)
 
-station_map = dict(config["station_mapping"])
-sensor_map = dict(config["sensor_mapping"])
+with open("data/value_map.json", "r") as f:
+    sensor_map = json.load(f)
 
 print("Mapping:")
-print(station_map)
-print(sensor_map)
+print("Station Map:", station_map)
+print("Sensor Map:", sensor_map)
 
 async def gateway_task(lora_rx_queue, mqtt_publish_queue):
     while True:
@@ -47,3 +47,36 @@ async def gateway_task(lora_rx_queue, mqtt_publish_queue):
 
         final_payload = json.dumps({mapped_station: [mapped_reading]})
         await mqtt_publish_queue.put(final_payload)
+
+def on_message(client, userdata, msg):
+    topic = msg.topic
+    payload = msg.payload.decode('utf-8', errors='ignore')
+    print(f"MQTT message received | Topic: {topic} | Payload: {payload}")
+
+    try:
+        data = json.loads(payload)
+    except json.JSONDecodeError:
+        print("Payload is not a valid json")
+        return
+    if topic == "v1/devices/me/attributes":
+        update_data(data)
+    elif topic == "v1/devices/me/attributes/response/1":
+        update_data(data["shared"])
+
+def update_data(json_data):
+    global station_map, sensor_map
+    if not isinstance(json_data, dict):
+        print("update_data nhận dữ liệu không hợp lệ.")
+        return
+
+    if "node_map" in json_data:
+        station_map = json_data["node_map"]
+        with open("data/node_map.json", "w") as f:
+            json.dump(station_map, f, indent=2)
+        print("Updated node_map")
+
+    if "value_map" in json_data:
+        sensor_map = json_data["value_map"]
+        with open("data/value_map.json", "w") as f:
+            json.dump(sensor_map, f, indent=2)
+        print("Updated value_map")

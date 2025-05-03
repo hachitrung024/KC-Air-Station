@@ -27,9 +27,8 @@ async def lora_receiver(lora_rx_queue):
         async with lora_lock:
             if lora.available() > 0:
                 try:
-                    code, value, rssi = lora.receive_message(rssi=True)
-                    print('RSSI: ', rssi)
-                    print(ResponseStatusCode.get_description(code))
+                    code, value = lora.receive_message(rssi=False)
+                    print('LoRa received raw:',value)
                     await lora_rx_queue.put(value)
                 except Exception as e:
                     print(" LoRa receiver error:", e)
@@ -64,15 +63,15 @@ def init_lora():
     configuration_to_set.SPED.uartBaudRate = UARTBaudRate.BPS_9600
 
     configuration_to_set.OPTION.subPacketSetting = SubPacketSetting.SPS_240_00
-    configuration_to_set.OPTION.transmissionPower = TransmissionPower22.POWER_22
-    configuration_to_set.OPTION.RSSIAmbientNoise = RssiAmbientNoiseEnable.RSSI_AMBIENT_NOISE_ENABLED
+    configuration_to_set.OPTION.transmissionPower = TransmissionPower22.POWER_17
+    configuration_to_set.OPTION.RSSIAmbientNoise = RssiAmbientNoiseEnable.RSSI_AMBIENT_NOISE_DISABLED
 
-    configuration_to_set.TRANSMISSION_MODE.WORTransceiverControl = WorTransceiverControl.WOR_TRANSMITTER
+    configuration_to_set.TRANSMISSION_MODE.WORTransceiverControl = WorTransceiverControl.WOR_RECEIVER
     configuration_to_set.TRANSMISSION_MODE.enableLBT = LbtEnableByte.LBT_DISABLED
-    configuration_to_set.TRANSMISSION_MODE.enableRSSI = RssiEnableByte.RSSI_ENABLED
+    configuration_to_set.TRANSMISSION_MODE.enableRSSI = RssiEnableByte.RSSI_DISABLED
     configuration_to_set.TRANSMISSION_MODE.enableRepeater = RepeaterModeEnableByte.REPEATER_DISABLED
     configuration_to_set.TRANSMISSION_MODE.fixedTransmission = FixedTransmission.FIXED_TRANSMISSION
-    configuration_to_set.TRANSMISSION_MODE.WORPeriod = WorPeriod.WOR_1500_010
+    configuration_to_set.TRANSMISSION_MODE.WORPeriod = WorPeriod.WOR_2500_100
 
     configuration_to_set.CRYPT.CRYPT_H = int(lora_cfg.get("crypt_h", "0x00"), 16)
     configuration_to_set.CRYPT.CRYPT_L = int(lora_cfg.get("crypt_l", "0x00"), 16)

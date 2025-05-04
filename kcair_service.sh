@@ -8,13 +8,13 @@
 
 SERVICE_NAME="kcair"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-WORK_DIR="/home/hachi/KC-Air-Station"
+USER_NAME=$(whoami)
+WORK_DIR="/home/${USER_NAME}/KC-Air-Station"
 RUN_SCRIPT="${WORK_DIR}/run_gateway.sh"
-USER_NAME="hachi"
 INTERFACE_NAME="usb0"  # Đổi tên interface tại đây nếu khác
 
 install_service() {
-    echo "Installing systemd service '${SERVICE_NAME}'..."
+    echo "Installing systemd service '${SERVICE_NAME}' for user '${USER_NAME}'..."
 
     if [ ! -f "$RUN_SCRIPT" ]; then
         echo "Error: ${RUN_SCRIPT} not found. Please check the path."
@@ -22,7 +22,7 @@ install_service() {
     fi
 
     # Create systemd service file
-sudo bash -c "cat > /etc/systemd/system/kcair.service" <<EOF
+    sudo bash -c "cat > $SERVICE_FILE" <<EOF
 [Unit]
 Description=KC Air Station Service
 After=network-online.target
@@ -30,11 +30,11 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/hachi/KC-Air-Station
-ExecStart=/bin/bash /home/hachi/KC-Air-Station/run_gateway.sh
+WorkingDirectory=${WORK_DIR}
+ExecStart=/bin/bash ${RUN_SCRIPT}
 Restart=always
 RestartSec=10
-User=hachi
+User=${USER_NAME}
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
@@ -46,7 +46,7 @@ EOF
     sudo systemctl enable ${SERVICE_NAME}
     sudo systemctl start ${SERVICE_NAME}
 
-    echo "Service '${SERVICE_NAME}' installed and started successfully."
+    echo "✅ Service '${SERVICE_NAME}' installed and started successfully."
     echo "Use 'sudo systemctl status ${SERVICE_NAME}' to check status."
 }
 
@@ -58,7 +58,7 @@ remove_service() {
     sudo rm -f ${SERVICE_FILE}
     sudo systemctl daemon-reload
 
-    echo "Service '${SERVICE_NAME}' removed."
+    echo "✅ Service '${SERVICE_NAME}' removed."
 }
 
 # Command line argument handling

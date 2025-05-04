@@ -3,13 +3,15 @@
 # chmod +x kcair_service.sh
 # Install: 
 # ./kcair_service.sh
-# Unistall: 
+# Uninstall: 
 # ./kcair_service.sh --remove
+
 SERVICE_NAME="kcair"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 WORK_DIR="/home/hachi/KC-Air-Station"
-RUN_SCRIPT="${WORK_DIR}/run.sh"
+RUN_SCRIPT="${WORK_DIR}/run_gateway.sh"
 USER_NAME="hachi"
+INTERFACE_NAME="usb0"  # Đổi tên interface tại đây nếu khác
 
 install_service() {
     echo "Installing systemd service '${SERVICE_NAME}'..."
@@ -20,19 +22,19 @@ install_service() {
     fi
 
     # Create systemd service file
-    sudo bash -c "cat > $SERVICE_FILE" <<EOF
+sudo bash -c "cat > /etc/systemd/system/kcair.service" <<EOF
 [Unit]
-Description=KC Air Station - Read from ttyACM0
-After=dev-ttyACM0.device
-Requires=dev-ttyACM0.device
+Description=KC Air Station Service
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=${WORK_DIR}
-ExecStart=/bin/bash ${RUN_SCRIPT}
+WorkingDirectory=/home/hachi/KC-Air-Station
+ExecStart=/bin/bash /home/hachi/KC-Air-Station/run_gateway.sh
 Restart=always
 RestartSec=10
-User=${USER_NAME}
+User=hachi
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
